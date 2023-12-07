@@ -98,6 +98,7 @@ impl Core {
         match self.trace_stack.pop_back() {
             None => unreachable!(),
             Some(frame) => {
+                self.put_(name.clone(), return_value.fast_clone());
                 let ta = match frame.kind {
                     TraceNestKind::Memo => TraceAction::Memo(frame.name, frame.trace),
                     TraceNestKind::Force => TraceAction::Force(frame.name, frame.trace),
