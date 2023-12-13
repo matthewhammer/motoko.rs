@@ -2,6 +2,7 @@ use crate::ast::{Exp_, Sym};
 use crate::value::{Closed, Value_};
 use im_rc::{HashMap, Vector};
 use serde::{Deserialize, Serialize};
+use crate::shared::FastClone;
 
 /// Node names.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -94,11 +95,11 @@ impl Core {
     }
 
     pub fn nest_end(&mut self, return_value: Value_) {
-        self.trace_action(TraceAction::Ret(return_value));
+        self.trace_action(TraceAction::Ret(return_value.fast_clone()));
         match self.trace_stack.pop_back() {
             None => unreachable!(),
             Some(frame) => {
-                self.put_(name.clone(), return_value.fast_clone());
+                self.put_(frame.name.clone(), return_value.fast_clone());
                 let ta = match frame.kind {
                     TraceNestKind::Memo => TraceAction::Memo(frame.name, frame.trace),
                     TraceNestKind::Force => TraceAction::Force(frame.name, frame.trace),
